@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content_filter
+  namespace: mico-system
+spec:
+  selector:
+    matchLabels:
+      run: content_filter
+  replicas: 1
+  template:
+    metadata:
+      namespace: mico-system
+      labels:
+        run: content_filter
+    spec:
+      containers:
+        - name: content_filter
+          image: ustmico/content_filter
+          imagePullPolicy: Always
+          env:
+            - name: KAFKA_BROKER
+              value: 'kafka-broker.mico-system.svc.cluster.local:9092'
+            - name: FILTER_REQUEST_TOPIC
+              value: 'filter-request-topic'
+            - name: FILTER_RESPONSE_TOPIC
+              value: 'filter-response-topic'

@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "./content-filter.py", "localhost:9092 enricher-request enricher-response"]
+CMD [ "python", "./content-filter.py", "localhost:9092", "filter-request", "filter-response"]

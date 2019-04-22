@@ -24,12 +24,17 @@ from confluent_kafka import Producer, Consumer, KafkaException
 import sys
 import logging
 import json
+import os
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
         sys.stderr.write(
             'Usage: %s <bootstrap-brokers> <requestTopic> <responseTopic>\n' % sys.argv[0])
         sys.exit(1)
+
+    # os.environ["KAFKA_BROKER"]
+    # os.environ["FILTER_REQUEST_TOPIC"]
+    # os.environ["FILTER_RESPONSE_TOPIC"]
 
     broker = sys.argv[1]
     requestTopic = sys.argv[2]
@@ -78,7 +83,7 @@ if __name__ == '__main__':
                                   str(msg.key())))
                 print(msg.value())
                 msgJson = json.loads(msg.value())
-                msgJson["enriched"] = "wohoo"
+                #msgJson["enriched"] = "wohoo"
                 if "removeme" in msgJson:
                     msgJson.pop("removeme")
                 try:
