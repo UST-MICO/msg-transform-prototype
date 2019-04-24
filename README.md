@@ -14,34 +14,52 @@ docker run -it --rm --name my-running-app content-filter
 
 **Windows:**
 
-```cmd
-.\bin\kafka-topics.bat --list --bootstrap-server localhost:9092
-.\bin\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic filter-request --partitions 1 --replication-factor 1
-.\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic filter-response --partitions 1 --replication-factor 1
+Start ZooKeeper:
+```powershell
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+```
 
-.\bin\kafka-console-producer.bat --bootstrap-server localhost:9092 --topic filter-request
-.\bin\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic filter-response
+Start Kafka:
+```powershell
+.\bin\windows\kafka-server-start.bat .\config\server.properties
+```
+
+Topics (list and create):
+```powershell
+.\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
+.\bin\windows\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic filter-request --partitions 1 --replication-factor 1
+.\bin\windows\kafka-topics.bat --create --bootstrap-server localhost:9092 --topic filter-response --partitions 1 --replication-factor 1
+```
+
+Messages (produce and consume):
+```console
+.\bin\windows\kafka-console-producer.bat --broker-list localhost:9092 --topic filter-request
+.\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic filter-response
 ```
 
 **Linux:**
 
 Start Zookeeper:
-```bash
+```console
 ./bin/zookeeper-server-start.sh ./config/zookeeper.properties
 ```
 
 Start Kafka:
-```bash
+```console
 ./bin/kafka-server-start.sh ./config/server.properties
 ```
 
-```bash
-./kafka-topics.sh --list --bootstrap-server localhost:9092
-./kafka-topics.sh --create --bootstrap-server localhost:9092 --topic filter-request --partitions 1 --replication-factor 1
-./kafka-topics.sh --create --bootstrap-server localhost:9092 --topic filter-response --partitions 1 --replication-factor 1
+Topics (list and create):
+```console
+./bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+./bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --topic filter-request --partitions 1 --replication-factor 1
+./bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --topic filter-response --partitions 1 --replication-factor 1
+```
 
-./kafka-console-producer.sh --broker-list localhost:9092 --topic filter-request
-./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic filter-response
+Messages (produce and consume):
+```console
+./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic filter-request
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic filter-response
 ```
 
 ## Example
