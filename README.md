@@ -1,5 +1,72 @@
 # Content Filter / Enricher
 
+## Discussion
+
+* Should there be multiple specialized filters / enrichers?
+  * Yes, it's not possible to implement one general-purpose filter / enricher
+  * It would make sense to implement a filter / enricher per data source
+  * Specialized types of an enricher:
+    * Computation
+    * Environment
+    * Database (e.g. MySQL)
+    * Files
+    * Other applications / services
+
+* How does a message producer know which filter / enricher is the correct one?
+  * A content based router could be the target of a producer that routes the message to the correct filter / enricher.
+
+* Filtering: Blacklist vs. whitelist?
+  * Both could be useful depending on the use case
+  * Configuration should decide
+
+* Filtering: How to flatten a hierarchy? How to remove a specific property in a nested structure?
+  * Flattening and removing properties should be splitted into two steps
+
+* What should be the purpose of an external configuration?
+  * Define properties that should be
+    * removed (blacklisting)
+    * remain unaffected, others will be removed (whitelisting)
+    * enriched with data (depending on type of the enricher)
+  * Set a specific mode (e.g. whitelisting vs. blacklisting)
+
+* What kind of external configuration should be used? Database? REST API? Environment variables?
+  * ->  At first the use of environment variables should be sufficient.
+
+**Example "GenericFilter" in whitelisting mode:**
+* Configuration: `{"mode":"WHITELISTING","properties":["important"]}`
+* Input: `{"key":"value","important":"value2}`
+* Output: `{"important":"value2"}`
+
+**Example "GenericFilter" in blacklisting mode:**
+* Configuration: `{"mode":"BLACKLISTING","properties":["removeme"]}`
+* Input: `{"key":"value","removeme":"value2}`
+* Output: `{"key":"value"}`
+
+**Example "GenericFilter" in flattening mode:**
+* Configuration: `{"mode":"FLATTENING"}`
+* Input: `{"object1":{"nested1":"value1"},"object2":{"nested2":"value2"}}`
+* Output: `{"nested1":"value1","nested2":"value2"}`
+
+**Example "ComputationEnricher":**
+* Python `eval` / `exec` can be used, however security concerns must be considered
+  * Access to variables and methods can be restricted (e.g. access to `os` must not be allowed)
+* Data source: no external data source required, value is directly computed
+* Configuration: `{"operations":[{"property":"addition","override":false,"target":"result"}]}`
+* Input: `{"addition":"3+5"}`
+* Output: `{"addition":"3+5", "result":"8"}`
+
+**Example "EnvironmentEnricher":**
+* Data source: environment
+* Configuration: `["local_time"]`
+* Input: `{"key":"value"}`
+* Output: `{"key":"value", "local_time":"2019-04-23T15:43:00Z"}`
+
+**Example "ExternalServiceEnricher":**
+* Data source: external service
+* Configuration: `{}`
+* Input: `[{"api":"http://dummy.restapiexample.com/api/v1/employee/5800","jsonpath":"$.employee_name", "target":"employee_name"}]`
+* Output: `[{"employee_name": "mahesh"}]`
+
 ## Usage
 
 **Docker build:**
