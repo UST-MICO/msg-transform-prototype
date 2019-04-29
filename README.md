@@ -77,6 +77,18 @@ docker run -it --rm --name my-running-app content-filter
 
 ## Commands
 
+### Docker
+
+**Start Kafka and ZooKeeper:**
+```bash
+docker-compose up
+```
+
+Remove containers and volumes:
+```bash
+docker-compose rm --force -v
+```
+
 ### Kafka
 
 **Windows:**
