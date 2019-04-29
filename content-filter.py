@@ -58,16 +58,17 @@ if __name__ == '__main__':
     # Hint: try debug='fetch' to generate some log messages
     c = Consumer(confc, logger=logger)
     c.subscribe([requestTopic])
+    logger.info("Content filter started. Waiting for messages on topic '%s'...", requestTopic)
     # Optional per-message delivery callback (triggered by poll() or flush())
     # when a message has been successfully delivered or permanently
     # failed delivery (after retries).
 
     def delivery_callback(err, msg):
         if err:
-            sys.stderr.write('%% Message failed delivery: %s\n' % err)
+            logger.error("Message failed delivery: %s", err)
         else:
-            sys.stderr.write('%% Message delivered to %s [%d] @ %d\n' %
-                             (msg.topic(), msg.partition(), msg.offset()))
+            logger.info("Message delivered to topic '%s' [%d] @ %d:\n%s", 
+                msg.topic(), msg.partition(), msg.offset(), msg.value().decode('utf-8'))
 
     try:
         while True:
@@ -77,23 +78,26 @@ if __name__ == '__main__':
             if msg.error():
                 raise KafkaException(msg.error())
             else:
-                # Proper message
-                sys.stderr.write('%% %s [%d] at offset %d with key %s:\n' %
-                                 (msg.topic(), msg.partition(), msg.offset(),
-                                  str(msg.key())))
-                print(msg.value())
-                msgJson = json.loads(msg.value())
-                #msgJson["enriched"] = "wohoo"
-                if "removeme" in msgJson:
-                    msgJson.pop("removeme")
+                # Process message
+                logger.info("Process message from topic '%s' [%d] @ %d with key '%s':\n%s", 
+                    msg.topic(), msg.partition(), msg.offset(), str(msg.key()), msg.value().decode('utf-8'))
                 try:
-                    # Produce line (without newline)
-                    p.produce(responseTopic, json.dumps(msgJson),
-                              callback=delivery_callback)
+                    msgJson = json.loads(msg.value())
 
-                except BufferError:
-                    sys.stderr.write('%% Local producer queue is full (%d messages awaiting delivery): try again\n' %
-                                     len(p))
+                    #msgJson["enriched"] = "wohoo"
+                    if "removeme" in msgJson:
+                        msgJson.pop("removeme")
+                    try:
+                        result = json.dumps(msgJson).encode('utf-8')
+                        logger.debug("Send message to topic '%s': %s", responseTopic, result.decode('utf-8'))
+                        # Produce line (without newline)
+                        p.produce(responseTopic, result, callback=delivery_callback)
+
+                    except BufferError:
+                        logger.error("Local producer queue is full (%d messages awaiting delivery): try again", len(p))
+
+                except json.decoder.JSONDecodeError:
+                    logger.error("Failed to decode JSON message '%s'!", msg.value().decode('utf-8'))
 
                 # Serve delivery callback queue.
                 # NOTE: Since produce() is an asynchronous API this poll() call
@@ -102,12 +106,12 @@ if __name__ == '__main__':
                 p.poll(0)
 
     except KeyboardInterrupt:
-        sys.stderr.write('%% Aborted by user\n')
+        logger.error('Aborted by user!')
 
     finally:
         # Close down consumer to commit final offsets.
         c.close()
 
     # Wait until all messages have been delivered
-    sys.stderr.write('%% Waiting for %d deliveries\n' % len(p))
+    logger.info('Waiting for %d deliveries', len(p))
     p.flush()
