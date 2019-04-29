@@ -16,3 +16,8 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  content-filter:
+    build: .
+    container_name: content-filter
+    environment:
+      KAFKA_BROKER: kafka:9092

@@ -69,17 +69,22 @@
 
 ## Usage
 
-**Docker build:**
+**Local:**
+```bash
+python ./content-filter.py localhost:9092 filter-request filter-response
+```
+
+**Docker build and run:**
 ```bash
 docker build -t content-filter .
-docker run -it --rm --name my-running-app content-filter
+docker run -it --rm --env KAFKA_BROKER=localhost:9092 --name my-content-filter content-filter
 ```
 
 ## Commands
 
 ### Docker
 
-**Start Kafka and ZooKeeper:**
+**Start everything:**
 ```bash
 docker-compose up
 ```

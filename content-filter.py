@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # Hint: try debug='fetch' to generate some log messages
     c = Consumer(confc, logger=logger)
     c.subscribe([requestTopic])
-    logger.info("Content filter started. Waiting for messages on topic '%s'...", requestTopic)
+    logger.info("Content filter connected to Kafka broker at '%s'. Waiting for messages on topic '%s'...", broker, requestTopic)
     # Optional per-message delivery callback (triggered by poll() or flush())
     # when a message has been successfully delivered or permanently
     # failed delivery (after retries).
