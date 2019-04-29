@@ -8,6 +8,8 @@ services:
   kafka:
     image: wurstmeister/kafka
     container_name: kafka
+    depends_on:
+      - zookeeper
     ports:
       - "9092:9092"
     environment:
@@ -19,5 +21,7 @@ services:
   content-filter:
     build: .
     container_name: content-filter
+    depends_on:
+      - kafka
     environment:
       KAFKA_BROKER: kafka:9092
